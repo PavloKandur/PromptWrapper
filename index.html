@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор Запиту для Промпт Інженера</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: 20px auto;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 95%; /* Або width: calc(100% - 16px); для врахування padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #28a745; /* Зелений */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #outputPrompt {
+            background-color: #e9ecef; /* Світло-сірий фон для результату */
+            font-family: monospace; /* Моноширинний шрифт для коду/промптів */
+            white-space: pre-wrap; /* Зберігати форматування */
+            word-wrap: break-word;
+            min-height: 100px;
+        }
+         h1 {
+            color: #0056b3; /* Темно-синій для заголовка */
+            text-align: center;
+            margin-bottom: 20px;
+         }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Генератор Запиту</h1>
+        <p>Введіть ваш текст (промпт), і він буде вставлений у шаблон запиту для промпт-інженера.</p>
+
+        <div>
+            <label for="inputText">Ваш оригінальний текст (промпт):</label>
+            <textarea id="inputText" placeholder="Наприклад: аовлрлаіраоірлвр"></textarea>
+        </div>
+
+        <button id="generateButton">Сформувати Запит</button>
+
+        <div>
+            <label for="outputPrompt">Готовий запит:</label>
+            <textarea id="outputPrompt" readonly placeholder="Результат з'явиться тут..." rows="8"></textarea>
+            </div>
+    </div>
+
+    <script>
+        // Отримуємо доступ до елементів
+        const inputTextElement = document.getElementById('inputText');
+        const generateButton = document.getElementById('generateButton');
+        const outputPromptElement = document.getElementById('outputPrompt');
+
+        // Додаємо обробник події на кнопку
+        generateButton.addEventListener('click', function() {
+            // 1. Отримуємо введений текст
+            const originalText = inputTextElement.value;
+
+            // 2. Перевіряємо, чи щось введено
+            if (!originalText.trim()) {
+                outputPromptElement.value = 'Будь ласка, введіть якийсь текст у поле вище.';
+                return; // Зупиняємо виконання функції
+            }
+
+            // 3. Формуємо фінальний рядок, використовуючи шаблонні рядки (template literals ` `` `)
+            // Це дозволяє легко вставляти змінні (${originalText}) прямо в рядок.
+            // Зверніть увагу на лапки "" навколо ${originalText} - вони є частиною бажаного тексту.
+            const finalPrompt = `Дій як промпт інженер, переглянь наступний промпт: "${originalText}" для мене, оптимізуй його, щоб зробити його кращим, і задай мені питання, які у тебе виникли, перш ніж продовжити`;
+
+            // 4. Встановлюємо згенерований текст у поле виводу
+            outputPromptElement.value = finalPrompt;
+        });
+    </script>
+
+</body>
+</html>
