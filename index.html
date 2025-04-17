@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор Запиту для Промпт Інженера</title>
+    <title>Генератор Запитів (UA/EN)</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             padding: 20px;
             line-height: 1.6;
             background-color: #f4f4f4;
@@ -27,7 +27,7 @@
             font-weight: bold;
         }
         textarea {
-            width: 95%; /* Або width: calc(100% - 16px); для врахування padding */
+            width: calc(100% - 22px); /* Width minus padding and border */
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
@@ -38,40 +38,72 @@
         }
         button {
             padding: 12px 20px;
-            background-color: #28a745; /* Зелений */
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 1em;
             transition: background-color 0.3s ease;
+            margin-top: 10px; /* Додамо відступ зверху */
         }
         button:hover {
             background-color: #218838;
         }
         #outputPrompt {
-            background-color: #e9ecef; /* Світло-сірий фон для результату */
-            font-family: monospace; /* Моноширинний шрифт для коду/промптів */
-            white-space: pre-wrap; /* Зберігати форматування */
+            background-color: #e9ecef;
+            font-family: monospace;
+            white-space: pre-wrap;
             word-wrap: break-word;
             min-height: 100px;
         }
-         h1 {
-            color: #0056b3; /* Темно-синій для заголовка */
+        h1 {
+            color: #0056b3;
             text-align: center;
             margin-bottom: 20px;
+        }
+        .language-selector {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .language-selector label {
+            display: inline-block; /* Розміщуємо мітки поруч з радіо-кнопками */
+            margin-right: 15px; /* Відступ між варіантами */
+            margin-top: 0; /* Скидаємо верхній відступ для міток всередині блоку */
+            font-weight: normal; /* Звичайний шрифт для варіантів мови */
+        }
+         .language-selector input[type="radio"] {
+             margin-right: 5px; /* Невеликий відступ між кнопкою і текстом */
+             vertical-align: middle; /* Вирівнюємо кнопки по вертикалі з текстом */
          }
+        .language-selector strong { /* Стиль для заголовка вибору мови */
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Генератор Запиту</h1>
-        <p>Введіть ваш текст (промпт), і він буде вставлений у шаблон запиту для промпт-інженера.</p>
+        <h1>Генератор Запитів (UA/EN)</h1>
+        <p>Введіть ваш текст (промпт), оберіть мову та отримайте готовий запит для промпт-інженера.</p>
+
+        <div class="language-selector">
+            <strong>Оберіть мову запиту:</strong>
+            <input type="radio" id="langUk" name="language" value="uk" checked>
+            <label for="langUk">Українська</label>
+
+            <input type="radio" id="langEn" name="language" value="en">
+            <label for="langEn">English</label>
+        </div>
 
         <div>
             <label for="inputText">Ваш оригінальний текст (промпт):</label>
-            <textarea id="inputText" placeholder="Наприклад: аовлрлаіраоірлвр"></textarea>
+            <textarea id="inputText" placeholder="Введіть текст сюди..."></textarea>
         </div>
 
         <button id="generateButton">Сформувати Запит</button>
@@ -79,7 +111,7 @@
         <div>
             <label for="outputPrompt">Готовий запит:</label>
             <textarea id="outputPrompt" readonly placeholder="Результат з'явиться тут..." rows="8"></textarea>
-            </div>
+        </div>
     </div>
 
     <script>
@@ -87,6 +119,14 @@
         const inputTextElement = document.getElementById('inputText');
         const generateButton = document.getElementById('generateButton');
         const outputPromptElement = document.getElementById('outputPrompt');
+        // Немає потреби отримувати радіокнопки тут, зробимо це в обробнику
+
+        // Визначимо шаблони для кожної мови
+        // Використовуємо функції, щоб легко підставляти текст
+        const promptTemplates = {
+            uk: (text) => `Дій як промпт інженер, переглянь наступний промпт: "${text}" для мене, оптимізуй його, щоб зробити його кращим, і задай мені питання, які у тебе виникли, перш ніж продовжити`,
+            en: (text) => `Act as a prompt engineer review the following prompt: "${text}" for me, optimize it to make it better and ask me questions you have before proceeding`
+        };
 
         // Додаємо обробник події на кнопку
         generateButton.addEventListener('click', function() {
@@ -95,16 +135,21 @@
 
             // 2. Перевіряємо, чи щось введено
             if (!originalText.trim()) {
-                outputPromptElement.value = 'Будь ласка, введіть якийсь текст у поле вище.';
+                outputPromptElement.value = 'Будь ласка, введіть якийсь текст у поле вище. / Please enter some text in the field above.';
                 return; // Зупиняємо виконання функції
             }
 
-            // 3. Формуємо фінальний рядок, використовуючи шаблонні рядки (template literals ` `` `)
-            // Це дозволяє легко вставляти змінні (${originalText}) прямо в рядок.
-            // Зверніть увагу на лапки "" навколо ${originalText} - вони є частиною бажаного тексту.
-            const finalPrompt = `Дій як промпт інженер, переглянь наступний промпт: "${originalText}" для мене, оптимізуй його, щоб зробити його кращим, і задай мені питання, які у тебе виникли, перш ніж продовжити`;
+            // 3. Визначаємо обрану мову
+            // Знаходимо позначену радіо-кнопку з групи 'language' і беремо її значення ('uk' або 'en')
+            const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
 
-            // 4. Встановлюємо згенерований текст у поле виводу
+            // 4. Отримуємо відповідний шаблон-функцію для обраної мови
+            const templateFunction = promptTemplates[selectedLanguage];
+
+            // 5. Генеруємо фінальний запит, викликавши функцію з оригінальним текстом
+            const finalPrompt = templateFunction(originalText);
+
+            // 6. Встановлюємо згенерований текст у поле виводу
             outputPromptElement.value = finalPrompt;
         });
     </script>
